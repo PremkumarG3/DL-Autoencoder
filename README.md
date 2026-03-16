@@ -3,9 +3,6 @@
 ## AIM
 To develop a convolutional autoencoder for image denoising application.
 
-## Problem Statement and Dataset
-
-
 ## DESIGN STEPS
 ### STEP 1: Problem Understanding and Dataset Selection
 ### STEP 2: Preprocessing the Dataset
@@ -16,7 +13,6 @@ To develop a convolutional autoencoder for image denoising application.
 
 
 ## PROGRAM
-
 ### Name: Prem Kumar G
 ### Register Number: 212223230158
 
@@ -24,15 +20,60 @@ To develop a convolutional autoencoder for image denoising application.
 # Autoencoder Definition
 class DenoisingAutoencoder(nn.Module):
     def __init__(self):
+        super(DenoisingAutoencoder, self).__init__()
 
+        self.encoder = nn.Sequential(
+            nn.Conv2d(1, 16, kernel_size=3, stride=2, padding=1),  # [B, 16, 14, 14]
+            nn.ReLU(),
+            nn.Conv2d(16, 32, kernel_size=3, stride=2, padding=1), # [B, 32, 7, 7]
+            nn.ReLU()
+        )
+
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(32, 16, kernel_size=3, stride=2, padding=1, output_padding=1),  # [B, 16, 14, 14]
+            nn.ReLU(),
+            nn.ConvTranspose2d(16, 1, kernel_size=3, stride=2, padding=1, output_padding=1),   # [B, 1, 28, 28]
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
 
 
 # Initialize model
+model = DenoisingAutoencoder().to(device)
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 # Training function
+def train(model, loader, criterion, optimizer, epochs=5):
+    model.train()
+    print("Name: Prem Kumar G")
+    print("Register number: 212223230158")
+    for epoch in range(epochs):
+        running_loss = 0.0
+        for images, _ in loader:
+            images = images.to(device)
+            noisy_images = add_noise(images).to(device)
+
+            # Forward pass
+            outputs = model(noisy_images)
+            loss = criterion(outputs, images)
+
+            # Backward pass and optimization
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+
+        print(f"Epoch [{epoch+1}/{epochs}], Loss: {running_loss/len(loader):.4f}")
+
 
 # Visualization function
-
+train(model, train_loader, criterion, optimizer, epochs=5)
+visualize_denoising(model, test_loader)
 
 ```
 
@@ -48,4 +89,4 @@ class DenoisingAutoencoder(nn.Module):
 <img width="1754" height="612" alt="image" src="https://github.com/user-attachments/assets/5f727514-eced-4ec0-b610-768a227745e5" />
 
 ## RESULT
-Thus, 
+Thus, the convolutional autoencoder for image denoising was executed successfully.
